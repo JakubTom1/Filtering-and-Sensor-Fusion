@@ -5,7 +5,7 @@ from EKF import IMUExtendedKalmanFilter
 
 
 def run_benchmark():
-    TRAIN_FILE = 'Data/train.csv'
+    TRAIN_FILE = 'Data_contest_2/train.csv'
     print("Loading data...")
 
     try:

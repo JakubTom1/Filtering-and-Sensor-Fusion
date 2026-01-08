@@ -16,7 +16,7 @@ def run_benchmark():
 
     # Scaling: milli-degrees/s -> rad/s
     GYRO_SCALE = 0.001 * (np.pi / 180.0)
-    N_CALIB = 200
+    N_CALIB = 9
     gyro_bias = data[['GyroX', 'GyroY', 'GyroZ']].iloc[:N_CALIB].mean().values
     print(f"[INFO] Calculated Gyro Bias: {gyro_bias}")
 

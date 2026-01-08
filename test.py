@@ -4,7 +4,7 @@ from sklearn.metrics import mean_squared_error
 from EKF import IMUExtendedKalmanFilter
 
 # KONFIGURACJA: ustaw na True aby wygenerować submission zamiast uruchamiać benchmark
-GENERATE_SUBMISSION = True
+GENERATE_SUBMISSION = False
 
 # Domyślne parametry EKF używane zarówno w benchmarku jak i przy generowaniu submission
 EKF_PARAMS = dict(
@@ -12,6 +12,9 @@ EKF_PARAMS = dict(
     accel_noise=0.005,
     mag_noise=3.0
 )
+
+N_CALIB = 9 # Liczba próbek do kalibracji na początku
+ACC_BIAS_CORRECTION = [-0.007, 0, -0.02]  # Korekta biasu akcelerometru w benchmarku
 
 def run_benchmark():
     TRAIN_FILE = 'Data_contest_2/train.csv'
@@ -25,16 +28,16 @@ def run_benchmark():
 
     # Scaling: milli-degrees/s -> rad/s
     GYRO_SCALE = 0.001 * (np.pi / 180.0)
-    N_CALIB = 9
+    
     gyro_bias = data[['GyroX', 'GyroY', 'GyroZ']].iloc[:N_CALIB].mean().values
     print(f"[INFO] Calculated Gyro Bias: {gyro_bias}")
 
     acc_mean_start = data[['AccX', 'AccY', 'AccZ']].iloc[:N_CALIB].mean().values
 
     acc_bias_correction = np.array([
-        acc_mean_start[0] - 0.0 - 0.007,  # Expected X = 0
-        acc_mean_start[1] - 0.0,  # Expected Y = 0 (Fixes Roll offset)
-        acc_mean_start[2] - 1.0 - 0.02  # Expected Z = 1
+        acc_mean_start[0] - 0.0 + ACC_BIAS_CORRECTION[0],  # Expected X = 0
+        acc_mean_start[1] - 0.0 + ACC_BIAS_CORRECTION[1],  # Expected Y = 0 (Fixes Roll offset)
+        acc_mean_start[2] - 1.0 + ACC_BIAS_CORRECTION[2]  # Expected Z = 1
     ])
     print(f"[INFO] Accelerometer Bias Correction: {acc_bias_correction}")
 
@@ -92,7 +95,6 @@ def generate_submission():
         return
 
     GYRO_SCALE = 0.001 * (np.pi / 180.0)
-    N_CALIB = 200
 
     # Calibration using first N_CALIB samples (assume stationary)
     gyro_bias = data[['GyroX', 'GyroY', 'GyroZ']].iloc[:N_CALIB].mean().values
@@ -100,9 +102,9 @@ def generate_submission():
 
     acc_mean_start = data[['AccX', 'AccY', 'AccZ']].iloc[:N_CALIB].mean().values
     acc_bias_correction = np.array([
-        acc_mean_start[0] - 0.0,
-        acc_mean_start[1] - 0.0,
-        acc_mean_start[2] - 1.0
+        acc_mean_start[0] - 0.0 + ACC_BIAS_CORRECTION[0],  # Expected X = 0
+        acc_mean_start[1] - 0.0 + ACC_BIAS_CORRECTION[1],  # Expected Y = 0 (Fixes Roll offset)
+        acc_mean_start[2] - 1.0 + ACC_BIAS_CORRECTION[2]  # Expected Z = 1
     ])
     print(f"[INFO] Accelerometer Bias Correction: {acc_bias_correction}")
 

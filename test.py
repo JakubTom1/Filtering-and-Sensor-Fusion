@@ -45,7 +45,8 @@ def run_benchmark():
     # Initialize EKF
     ekf = IMUExtendedKalmanFilter(
         process_noise=1e-5,  # Trust Gyro heavily
-        accel_noise=0.05  # Trust Accel moderately
+        accel_noise=0.05,  # Trust Accel moderately
+        mag_noise=0.5  # Trust Mag moderately
     )
 
     ekf.initialize_from_data(acc_vals[0], mag_vals[0])

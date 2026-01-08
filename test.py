@@ -25,7 +25,7 @@ def run_benchmark():
     acc_bias_correction = np.array([
         acc_mean_start[0] - 0.0,  # Expected X = 0
         acc_mean_start[1] - 0.0,  # Expected Y = 0 (Fixes Roll offset)
-        acc_mean_start[2] - 1.0  # Expected Z = 1
+        acc_mean_start[2] - 1.0 - 0.02  # Expected Z = 1
     ])
     print(f"[INFO] Accelerometer Bias Correction: {acc_bias_correction}")
 

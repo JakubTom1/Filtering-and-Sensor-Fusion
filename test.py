@@ -4,13 +4,13 @@ from sklearn.metrics import mean_squared_error
 from EKF import IMUExtendedKalmanFilter
 
 # KONFIGURACJA: ustaw na True aby wygenerować submission zamiast uruchamiać benchmark
-GENERATE_SUBMISSION = False
+GENERATE_SUBMISSION = True
 
 # Domyślne parametry EKF używane zarówno w benchmarku jak i przy generowaniu submission
 EKF_PARAMS = dict(
-    process_noise=7.75e-5,
-    accel_noise=0.005,
-    mag_noise=3.0
+    process_noise=11e-5,
+    accel_noise=0.006,
+    mag_noise=21.0
 )
 
 N_CALIB = 9 # Liczba próbek do kalibracji na początku

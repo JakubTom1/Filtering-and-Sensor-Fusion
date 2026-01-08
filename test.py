@@ -23,7 +23,7 @@ def run_benchmark():
     acc_mean_start = data[['AccX', 'AccY', 'AccZ']].iloc[:N_CALIB].mean().values
 
     acc_bias_correction = np.array([
-        acc_mean_start[0] - 0.0,  # Expected X = 0
+        acc_mean_start[0] - 0.0 - 0.007,  # Expected X = 0
         acc_mean_start[1] - 0.0,  # Expected Y = 0 (Fixes Roll offset)
         acc_mean_start[2] - 1.0 - 0.02  # Expected Z = 1
     ])

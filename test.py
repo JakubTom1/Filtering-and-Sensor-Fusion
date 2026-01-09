@@ -4,7 +4,7 @@ from sklearn.metrics import mean_squared_error
 from EKF import IMUExtendedKalmanFilter
 
 # KONFIGURACJA: ustaw na True aby wygenerować submission zamiast uruchamiać benchmark
-GENERATE_SUBMISSION = True
+GENERATE_SUBMISSION = False
 
 # Domyślne parametry EKF używane zarówno w benchmarku jak i przy generowaniu submission
 EKF_PARAMS = dict(
@@ -15,6 +15,7 @@ EKF_PARAMS = dict(
 
 N_CALIB = 9 # Liczba próbek do kalibracji na początku
 ACC_BIAS_CORRECTION = [-0.007, 0, -0.02]  # Korekta biasu akcelerometru w benchmarku
+GYRO_BIAS = [-30, -18.8, 0.6]  # Dodatkowy bias żyroskopu (jeśli potrzebny)
 
 def run_benchmark():
     TRAIN_FILE = 'Data_contest_2/train.csv'
@@ -30,6 +31,11 @@ def run_benchmark():
     GYRO_SCALE = 0.001 * (np.pi / 180.0)
     
     gyro_bias = data[['GyroX', 'GyroY', 'GyroZ']].iloc[:N_CALIB].mean().values
+    gyro_bias = np.array([
+        gyro_bias[0]  + GYRO_BIAS[0],
+        gyro_bias[1] + GYRO_BIAS[1],
+        gyro_bias[2] + GYRO_BIAS[2]  
+    ])
     print(f"[INFO] Calculated Gyro Bias: {gyro_bias}")
 
     acc_mean_start = data[['AccX', 'AccY', 'AccZ']].iloc[:N_CALIB].mean().values
@@ -98,6 +104,11 @@ def generate_submission():
 
     # Calibration using first N_CALIB samples (assume stationary)
     gyro_bias = data[['GyroX', 'GyroY', 'GyroZ']].iloc[:N_CALIB].mean().values
+    gyro_bias = np.array([
+        gyro_bias[0]  + GYRO_BIAS[0],
+        gyro_bias[1] + GYRO_BIAS[1],
+        gyro_bias[2] + GYRO_BIAS[2]  
+    ])
     print(f"[INFO] Calculated Gyro Bias: {gyro_bias}")
 
     acc_mean_start = data[['AccX', 'AccY', 'AccZ']].iloc[:N_CALIB].mean().values

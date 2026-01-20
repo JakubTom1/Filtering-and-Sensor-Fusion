@@ -2,20 +2,22 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import mean_squared_error
 from EKF import IMUExtendedKalmanFilter
+import matplotlib.pyplot as plt
 
 # KONFIGURACJA: ustaw na True aby wygenerować submission zamiast uruchamiać benchmark
-GENERATE_SUBMISSION = False
+GENERATE_SUBMISSION = True
 
 # Domyślne parametry EKF używane zarówno w benchmarku jak i przy generowaniu submission
 EKF_PARAMS = dict(
-    process_noise=11e-5,
-    accel_noise=0.006,
-    mag_noise=21.0
+    process_noise=4e-5,
+    accel_noise=0.007,
+    mag_noise=35
 )
 
 N_CALIB = 9 # Liczba próbek do kalibracji na początku
-ACC_BIAS_CORRECTION = [-0.007, 0, -0.02]  # Korekta biasu akcelerometru w benchmarku
-GYRO_BIAS = [-30, -18.8, 0.6]  # Dodatkowy bias żyroskopu (jeśli potrzebny)
+ACC_BIAS_CORRECTION = [-0.01, 0.004, -0.025]  # Korekta biasu akcelerometru w benchmarku
+#ACC_BIAS_CORRECTION = [-0.007, 0, -0.02]  # Korekta biasu akcelerometru w benchmarku
+GYRO_BIAS = [25, -70, -0.5]  # Dodatkowy bias żyroskopu (jeśli potrzebny)
 
 def run_benchmark():
     TRAIN_FILE = 'Data_contest_2/train.csv'
@@ -36,6 +38,8 @@ def run_benchmark():
         gyro_bias[1] + GYRO_BIAS[1],
         gyro_bias[2] + GYRO_BIAS[2]  
     ])
+    #print("head of train file: ")
+    #print(data[:20])
     print(f"[INFO] Calculated Gyro Bias: {gyro_bias}")
 
     acc_mean_start = data[['AccX', 'AccY', 'AccZ']].iloc[:N_CALIB].mean().values
@@ -92,10 +96,12 @@ def run_benchmark():
 def generate_submission():
     TEST_FILE = 'Data_contest_2/test.csv'
     OUT_FILE = 'Data_contest_2/submission.csv'
+    TRAIN_FILE= 'Data_contest_2/train.csv'
     print(f"[INFO] Loading data from {TEST_FILE}...")
 
     try:
         data = pd.read_csv(TEST_FILE)
+        data_train = pd.read_csv(TRAIN_FILE)
     except FileNotFoundError:
         print(f"[ERROR] File {TEST_FILE} not found.")
         return
@@ -144,6 +150,34 @@ def generate_submission():
     df_out = pd.DataFrame(results, columns=['Id', 'pitch', 'roll', 'yaw'])
     df_out.to_csv(OUT_FILE, index=False)
     print(f"[SUCCESS] Submission saved to '{OUT_FILE}'")
+
+   # ===== WYKRES: TYLKO TEST (EKF) =====
+    results = np.array(results)
+
+    fig, axs = plt.subplots(3, 1, figsize=(12, 10))
+
+    titles = ['Pitch (Pochylenie)', 'Roll (Przechył)', 'Yaw (Odchylenie)']
+    colors = ['tab:blue', 'tab:orange', 'tab:green']
+
+    for i in range(3):
+        axs[i].plot(
+            times,
+            results[:, i + 1],
+            color=colors[i],
+            label='EKF'
+        )
+        axs[i].set_title(titles[i])
+        axs[i].set_ylabel('Stopnie')
+        axs[i].grid(True)
+        axs[i].legend()
+
+    axs[-1].set_xlabel('Czas [s]')
+    plt.tight_layout()
+    plt.savefig('quality_check_test.png')
+    plt.show()
+
+    print("[INFO] Wykres testowy zapisany jako quality_check_test.png")
+
 
 if __name__ == "__main__":
     if GENERATE_SUBMISSION:
